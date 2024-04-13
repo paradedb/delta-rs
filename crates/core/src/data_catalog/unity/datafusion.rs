@@ -7,6 +7,7 @@ use std::sync::Arc;
 use dashmap::DashMap;
 use datafusion::catalog::schema::SchemaProvider;
 use datafusion::catalog::{CatalogProvider, CatalogProviderList};
+use datafusion_common::DataFusionError;
 use datafusion::datasource::TableProvider;
 use tracing::error;
 
@@ -180,25 +181,26 @@ impl SchemaProvider for UnitySchemaProvider {
         self.table_names.clone()
     }
 
-    async fn table(&self, name: &str) -> Option<Arc<dyn TableProvider>> {
+    async fn table(&self, name: &str) -> Result<Option<Arc<dyn TableProvider>>, DataFusionError> {
+        // TODO: this returns a DataCatalogError, which I am converting to a DF error? (serina)
         let maybe_table = self
             .client
             .get_table(&self.catalog_name, &self.schema_name, name)
             .await
-            .ok()?;
+            .map_err(|err| DataFusionError::Execution(err.to_string()))?;
 
         match maybe_table {
             GetTableResponse::Success(table) => {
                 let table = DeltaTableBuilder::from_uri(table.storage_location)
                     .with_storage_options(self.storage_options.clone())
                     .load()
-                    .await
-                    .ok()?;
-                Some(Arc::new(table))
+                    .await?;
+                Ok(Some(Arc::new(table)))
             }
             GetTableResponse::Error(err) => {
+                // TODO: this previously returned None. Instead we should return a DataFusion Error? (serina)
                 error!("failed to fetch table from unity catalog: {}", err.message);
-                None
+                Err(DataFusionError::Execution(format!("failed to fetch table from unity catalog: {}", err.message)))
             }
         }
     }

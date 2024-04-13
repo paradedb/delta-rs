@@ -110,12 +110,11 @@ impl SchemaProvider for ListingSchemaProvider {
         self.tables.iter().map(|t| t.key().clone()).collect()
     }
 
-    async fn table(&self, name: &str) -> Option<Arc<dyn TableProvider>> {
-        let location = self.tables.get(name).map(|t| t.clone())?;
+    async fn table(&self, name: &str) -> Result<Option<Arc<dyn TableProvider>>, DataFusionError> {
+        let location = self.tables.get(name).ok_or(DataFusionError::Execution(format!("Table {} not found", name)))?.clone();
         let provider = open_table_with_storage_options(location, self.storage_options.0.clone())
-            .await
-            .ok()?;
-        Some(Arc::new(provider) as Arc<dyn TableProvider>)
+            .await?;
+        Ok(Some(Arc::new(provider) as Arc<dyn TableProvider>))
     }
 
     fn register_table(

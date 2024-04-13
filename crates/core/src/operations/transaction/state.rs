@@ -219,6 +219,27 @@ impl<'a> PruningStatistics for AddContainer<'a> {
     fn contained(&self, _column: &Column, _value: &HashSet<ScalarValue>) -> Option<BooleanArray> {
         None
     }
+
+    // This function is required since DataFusion 37.0
+    // I have echoed the null_counts implementation here (Serina)
+    fn row_counts(&self, column: &Column) -> Option<ArrayRef> {
+        let values = self.inner.iter().map(|add| {
+            // the add action has a stats string
+            // number of rows found in statistics.num_records
+            // if stats exists, use num_records. if column exists, num_records. otherwise, 0
+            // if stats doesn't exist, number of rows not known, so null?
+            if let Ok(Some(statistics)) = add.get_stats() {
+                if self.partition_columns.contains(&column.name) {
+                    ScalarValue::UInt64(Some(statistics.num_records as u64))
+                } else {
+                    ScalarValue::UInt64(Some(0))
+                }
+            } else {
+                ScalarValue::UInt64(None)
+            }
+        });
+        ScalarValue::iter_to_array(values).ok()
+    }
 }
 
 impl PruningStatistics for EagerSnapshot {
@@ -262,6 +283,15 @@ impl PruningStatistics for EagerSnapshot {
     fn contained(&self, _column: &Column, _value: &HashSet<ScalarValue>) -> Option<BooleanArray> {
         None
     }
+
+    // This function is required since DataFusion 37.0
+    // I have echoed the null_counts implementation here (Serina)
+    fn row_counts(&self, column: &Column) -> Option<ArrayRef> {
+        let files = self.file_actions().ok()?.collect_vec();
+        let partition_columns = &self.metadata().partition_columns;
+        let container = AddContainer::new(&files, partition_columns, self.arrow_schema().ok()?);
+        container.row_counts(column)
+    }
 }
 
 impl PruningStatistics for DeltaTableState {
@@ -283,6 +313,10 @@ impl PruningStatistics for DeltaTableState {
 
     fn contained(&self, column: &Column, values: &HashSet<ScalarValue>) -> Option<BooleanArray> {
         self.snapshot.contained(column, values)
+    }
+
+    fn row_counts(&self, column: &Column) -> Option<ArrayRef> {
+        self.snapshot.row_counts(column)
     }
 }
 
