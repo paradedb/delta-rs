@@ -18,9 +18,7 @@ use std::{
 
 use arrow_array::{builder::UInt64Builder, ArrayRef, RecordBatch};
 use arrow_schema::SchemaRef;
-use datafusion::physical_plan::{
-    DisplayAs, DisplayFormatType, ExecutionPlan, RecordBatchStream, SendableRecordBatchStream,
-};
+use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionPlan, PlanProperties, RecordBatchStream, SendableRecordBatchStream};
 use datafusion_common::{DataFusionError, Result as DataFusionResult};
 use datafusion_expr::{Expr, LogicalPlan, UserDefinedLogicalNodeCore};
 use datafusion_physical_expr::{Distribution, PhysicalExpr};
@@ -71,20 +69,16 @@ impl ExecutionPlan for MergeBarrierExec {
         self
     }
 
-    fn schema(&self) -> arrow_schema::SchemaRef {
+    fn schema(&self) -> SchemaRef {
         self.input.schema()
     }
 
-    fn output_partitioning(&self) -> datafusion_physical_expr::Partitioning {
-        self.input.output_partitioning()
+    fn properties(&self) -> &PlanProperties {
+        self.input.properties()
     }
 
     fn required_input_distribution(&self) -> Vec<Distribution> {
         vec![Distribution::HashPartitioned(vec![self.expr.clone()]); 1]
-    }
-
-    fn output_ordering(&self) -> Option<&[datafusion_physical_expr::PhysicalSortExpr]> {
-        None
     }
 
     fn children(&self) -> Vec<std::sync::Arc<dyn ExecutionPlan>> {

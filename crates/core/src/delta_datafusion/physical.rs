@@ -4,7 +4,7 @@ use std::sync::Arc;
 use arrow_schema::SchemaRef;
 use datafusion::arrow::record_batch::RecordBatch;
 use datafusion::error::Result as DataFusionResult;
-use datafusion::physical_plan::DisplayAs;
+use datafusion::physical_plan::{DisplayAs, PlanProperties};
 use datafusion::physical_plan::{
     metrics::{ExecutionPlanMetricsSet, MetricsSet},
     ExecutionPlan, RecordBatchStream, SendableRecordBatchStream,
@@ -82,12 +82,8 @@ impl ExecutionPlan for MetricObserverExec {
         self.parent.schema()
     }
 
-    fn output_partitioning(&self) -> datafusion::physical_plan::Partitioning {
-        self.parent.output_partitioning()
-    }
-
-    fn output_ordering(&self) -> Option<&[datafusion_physical_expr::PhysicalSortExpr]> {
-        self.parent.output_ordering()
+    fn properties(&self) -> &PlanProperties {
+        self.parent.properties()
     }
 
     fn children(&self) -> Vec<Arc<dyn ExecutionPlan>> {

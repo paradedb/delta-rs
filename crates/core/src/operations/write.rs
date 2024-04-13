@@ -36,7 +36,7 @@ use arrow_schema::{ArrowError, DataType, Fields, SchemaRef as ArrowSchemaRef};
 use datafusion::execution::context::{SessionContext, SessionState, TaskContext};
 use datafusion::physical_expr::create_physical_expr;
 use datafusion::physical_plan::filter::FilterExec;
-use datafusion::physical_plan::{memory::MemoryExec, ExecutionPlan};
+use datafusion::physical_plan::{memory::MemoryExec, ExecutionPlan, ExecutionPlanProperties};
 use datafusion_common::DFSchema;
 use datafusion_expr::Expr;
 use futures::future::BoxFuture;
