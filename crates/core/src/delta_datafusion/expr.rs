@@ -76,6 +76,18 @@ impl<'a> ContextProvider for DeltaContextProvider<'a> {
     fn get_table_source(&self, _name: TableReference) -> DFResult<Arc<dyn TableSource>> {
         unimplemented!()
     }
+
+    fn udfs_names(&self) -> Vec<String> {
+        self.state.scalar_functions().keys().cloned().collect()
+    }
+
+    fn udafs_names(&self) -> Vec<String> {
+        self.state.aggregate_functions().keys().cloned().collect()
+    }
+
+    fn udwfs_names(&self) -> Vec<String> {
+        self.state.window_functions().keys().cloned().collect()
+    }
 }
 
 /// Parse a string predicate into an `Expr`

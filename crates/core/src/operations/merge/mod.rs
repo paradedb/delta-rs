@@ -843,16 +843,18 @@ fn generalize_filter(
     }
 }
 
+// Serina: I kept the function signature and unwrapped the Transformed<Expr> into an Expr into a function
+// since it didn't look like try_construct_early_filter was actually using the yes/no part of the transform
 fn replace_placeholders(expr: Expr, placeholders: &HashMap<String, ScalarValue>) -> Expr {
     expr.transform(&|expr| match expr {
         Expr::Placeholder(Placeholder { id, .. }) => {
             let value = placeholders[&id].clone();
             // Replace the placeholder with the value
-            Ok(Transformed::Yes(Expr::Literal(value)))
+            Ok(Transformed::yes(Expr::Literal(value)))
         }
-        _ => Ok(Transformed::No(expr)),
+        _ => Ok(Transformed::no(expr)),
     })
-    .unwrap()
+    .unwrap().data
 }
 
 async fn try_construct_early_filter(
@@ -1468,16 +1470,16 @@ async fn execute(
 fn remove_table_alias(expr: Expr, table_alias: &str) -> Expr {
     expr.transform(&|expr| match expr {
         Expr::Column(c) => match c.relation {
-            Some(rel) if rel.table() == table_alias => Ok(Transformed::Yes(Expr::Column(
+            Some(rel) if rel.table() == table_alias => Ok(Transformed::yes(Expr::Column(
                 Column::new_unqualified(c.name),
             ))),
-            _ => Ok(Transformed::No(Expr::Column(Column::new(
+            _ => Ok(Transformed::no(Expr::Column(Column::new(
                 c.relation, c.name,
             )))),
         },
-        _ => Ok(Transformed::No(expr)),
+        _ => Ok(Transformed::no(expr)),
     })
-    .unwrap()
+    .unwrap().data
 }
 
 // TODO: Abstract MergePlanner into DeltaPlanner to support other delta operations in the future.
