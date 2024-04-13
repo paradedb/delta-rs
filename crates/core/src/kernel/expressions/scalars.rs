@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 
 use arrow_array::Array;
+use arrow_schema::DataType::Utf8View;
 use arrow_schema::TimeUnit;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Utc};
 use object_store::path::Path;
@@ -258,6 +259,7 @@ impl Scalar {
                 }
                 Some(Self::Struct(values, struct_fields))
             }
+            // (serina) view types are not yet fully supported in datafusion, so I'm having them convert to None
             Float16
             | Decimal256(_, _)
             | List(_)
@@ -273,6 +275,10 @@ impl Scalar {
             | Dictionary(_, _)
             | RunEndEncoded(_, _)
             | Union(_, _)
+            | BinaryView
+            | Utf8View
+            | ListView(_)
+            | LargeListView(_)
             | Null => None,
         }
     }

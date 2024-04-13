@@ -897,7 +897,12 @@ pub(crate) fn get_null_of_arrow_type(t: &ArrowDataType) -> DeltaResult<ScalarVal
             Box::new(get_null_of_arrow_type(v).unwrap()),
         )),
         //Unsupported types...
+        // serina: views are unsupported since datafusion says they're not fully supported
         ArrowDataType::Float16
+        | ArrowDataType::BinaryView
+        | ArrowDataType::Utf8View
+        | ArrowDataType::ListView(_)
+        | ArrowDataType::LargeListView(_)
         | ArrowDataType::Decimal256(_, _)
         | ArrowDataType::Union(_, _)
         | ArrowDataType::LargeList(_)
