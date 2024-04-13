@@ -9,7 +9,7 @@ use arrow_schema::SchemaRef;
 use datafusion::error::Result;
 use datafusion::execution::{RecordBatchStream, SendableRecordBatchStream, TaskContext};
 use datafusion::physical_plan::memory::MemoryStream;
-use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionPlan};
+use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionPlan, PlanProperties};
 use datafusion::prelude::SessionContext;
 use datafusion_common::tree_node::TreeNode;
 use datafusion_expr::Expr;
@@ -83,6 +83,10 @@ impl ExecutionPlan for FindFilesExec {
 
     fn schema(&self) -> SchemaRef {
         ONLY_FILES_SCHEMA.clone()
+    }
+
+    fn properties(&self) -> &PlanProperties {
+        todo!()
     }
 
     fn output_partitioning(&self) -> Partitioning {
