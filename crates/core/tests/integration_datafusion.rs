@@ -44,7 +44,7 @@ use deltalake_core::{
 use std::error::Error;
 
 mod local {
-    use datafusion::common::stats::Precision;
+    use datafusion::{common::stats::Precision, physical_plan::ExecutionPlanProperties};
     use deltalake_core::{logstore::default_logstore, writer::JsonWriter};
     use object_store::local::LocalFileSystem;
 

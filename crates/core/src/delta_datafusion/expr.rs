@@ -427,9 +427,10 @@ impl<'a> fmt::Display for ScalarValueFormat<'a> {
 #[cfg(test)]
 mod test {
     use arrow_schema::DataType as ArrowDataType;
+    use datafusion::functions_array::expr_fn::cardinality;
     use datafusion::prelude::SessionContext;
     use datafusion_common::{Column, ScalarValue, ToDFSchema};
-    use datafusion_expr::{cardinality, col, lit, substring, Cast, Expr, ExprSchemable};
+    use datafusion_expr::{col, lit, substring, Cast, Expr, ExprSchemable};
     use datafusion_functions::encoding::expr_fn::decode;
 
     use crate::delta_datafusion::{DataFusionMixins, DeltaSessionContext};

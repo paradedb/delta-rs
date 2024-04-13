@@ -221,24 +221,9 @@ impl<'a> PruningStatistics for AddContainer<'a> {
     }
 
     // This function is required since DataFusion 37.0
-    // I have echoed the null_counts implementation here (Serina)
-    fn row_counts(&self, column: &Column) -> Option<ArrayRef> {
-        let values = self.inner.iter().map(|add| {
-            // the add action has a stats string
-            // number of rows found in statistics.num_records
-            // if stats exists, use num_records. if column exists, num_records. otherwise, 0
-            // if stats doesn't exist, number of rows not known, so null?
-            if let Ok(Some(statistics)) = add.get_stats() {
-                if self.partition_columns.contains(&column.name) {
-                    ScalarValue::UInt64(Some(statistics.num_records as u64))
-                } else {
-                    ScalarValue::UInt64(Some(0))
-                }
-            } else {
-                ScalarValue::UInt64(None)
-            }
-        });
-        ScalarValue::iter_to_array(values).ok()
+    // I made it a no-op and all tests passed
+    fn row_counts(&self, _column: &Column) -> Option<ArrayRef> {
+        None
     }
 }
 
