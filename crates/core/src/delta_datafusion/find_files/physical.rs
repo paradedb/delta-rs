@@ -9,7 +9,9 @@ use arrow_schema::SchemaRef;
 use datafusion::error::Result;
 use datafusion::execution::{RecordBatchStream, SendableRecordBatchStream, TaskContext};
 use datafusion::physical_plan::memory::MemoryStream;
-use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionMode, ExecutionPlan, PlanProperties};
+use datafusion::physical_plan::{
+    DisplayAs, DisplayFormatType, ExecutionMode, ExecutionPlan, PlanProperties,
+};
 use datafusion::prelude::SessionContext;
 use datafusion_common::tree_node::TreeNode;
 use datafusion_expr::Expr;
@@ -33,12 +35,11 @@ pub struct FindFilesExec {
 
 impl FindFilesExec {
     pub fn new(state: DeltaTableState, log_store: LogStoreRef, predicate: Expr) -> Result<Self> {
-        let cache =
-            PlanProperties::new(
-                EquivalenceProperties::new(ONLY_FILES_SCHEMA.clone()),
-                Partitioning::RoundRobinBatch(num_cpus::get()),
-                ExecutionMode::Bounded
-            );
+        let cache = PlanProperties::new(
+            EquivalenceProperties::new(ONLY_FILES_SCHEMA.clone()),
+            Partitioning::RoundRobinBatch(num_cpus::get()),
+            ExecutionMode::Bounded,
+        );
         Ok(Self {
             predicate,
             log_store,

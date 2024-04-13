@@ -18,7 +18,10 @@ use std::{
 
 use arrow_array::{builder::UInt64Builder, ArrayRef, RecordBatch};
 use arrow_schema::SchemaRef;
-use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionPlan, PlanProperties, RecordBatchStream, SendableRecordBatchStream};
+use datafusion::physical_plan::{
+    DisplayAs, DisplayFormatType, ExecutionPlan, PlanProperties, RecordBatchStream,
+    SendableRecordBatchStream,
+};
 use datafusion_common::{DataFusionError, Result as DataFusionResult};
 use datafusion_expr::{Expr, LogicalPlan, UserDefinedLogicalNodeCore};
 use datafusion_physical_expr::{Distribution, PhysicalExpr};

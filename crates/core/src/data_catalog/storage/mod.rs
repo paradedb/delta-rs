@@ -111,9 +111,16 @@ impl SchemaProvider for ListingSchemaProvider {
     }
 
     async fn table(&self, name: &str) -> Result<Option<Arc<dyn TableProvider>>, DataFusionError> {
-        let location = self.tables.get(name).ok_or(DataFusionError::Execution(format!("Table {} not found", name)))?.clone();
-        let provider = open_table_with_storage_options(location, self.storage_options.0.clone())
-            .await?;
+        let location = self
+            .tables
+            .get(name)
+            .ok_or(DataFusionError::Execution(format!(
+                "Table {} not found",
+                name
+            )))?
+            .clone();
+        let provider =
+            open_table_with_storage_options(location, self.storage_options.0.clone()).await?;
         Ok(Some(Arc::new(provider) as Arc<dyn TableProvider>))
     }
 

@@ -4,11 +4,11 @@ use std::sync::Arc;
 use arrow_schema::SchemaRef;
 use datafusion::arrow::record_batch::RecordBatch;
 use datafusion::error::Result as DataFusionResult;
-use datafusion::physical_plan::{DisplayAs, PlanProperties};
 use datafusion::physical_plan::{
     metrics::{ExecutionPlanMetricsSet, MetricsSet},
     ExecutionPlan, RecordBatchStream, SendableRecordBatchStream,
 };
+use datafusion::physical_plan::{DisplayAs, PlanProperties};
 use futures::{Stream, StreamExt};
 
 use crate::DeltaTableError;

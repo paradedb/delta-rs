@@ -7,8 +7,8 @@ use std::sync::Arc;
 use dashmap::DashMap;
 use datafusion::catalog::schema::SchemaProvider;
 use datafusion::catalog::{CatalogProvider, CatalogProviderList};
-use datafusion_common::DataFusionError;
 use datafusion::datasource::TableProvider;
+use datafusion_common::DataFusionError;
 use tracing::error;
 
 use super::models::{GetTableResponse, ListCatalogsResponse, ListTableSummariesResponse};
@@ -200,7 +200,10 @@ impl SchemaProvider for UnitySchemaProvider {
             GetTableResponse::Error(err) => {
                 // TODO: this previously returned None. Instead we should return a DataFusion Error? (serina)
                 error!("failed to fetch table from unity catalog: {}", err.message);
-                Err(DataFusionError::Execution(format!("failed to fetch table from unity catalog: {}", err.message)))
+                Err(DataFusionError::Execution(format!(
+                    "failed to fetch table from unity catalog: {}",
+                    err.message
+                )))
             }
         }
     }

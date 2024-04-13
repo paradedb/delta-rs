@@ -854,7 +854,8 @@ fn replace_placeholders(expr: Expr, placeholders: &HashMap<String, ScalarValue>)
         }
         _ => Ok(Transformed::no(expr)),
     })
-    .unwrap().data
+    .unwrap()
+    .data
 }
 
 async fn try_construct_early_filter(
@@ -1479,7 +1480,8 @@ fn remove_table_alias(expr: Expr, table_alias: &str) -> Expr {
         },
         _ => Ok(Transformed::no(expr)),
     })
-    .unwrap().data
+    .unwrap()
+    .data
 }
 
 // TODO: Abstract MergePlanner into DeltaPlanner to support other delta operations in the future.
