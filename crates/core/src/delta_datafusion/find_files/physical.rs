@@ -9,11 +9,11 @@ use arrow_schema::SchemaRef;
 use datafusion::error::Result;
 use datafusion::execution::{RecordBatchStream, SendableRecordBatchStream, TaskContext};
 use datafusion::physical_plan::memory::MemoryStream;
-use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionPlan, PlanProperties};
+use datafusion::physical_plan::{DisplayAs, DisplayFormatType, ExecutionMode, ExecutionPlan, PlanProperties};
 use datafusion::prelude::SessionContext;
 use datafusion_common::tree_node::TreeNode;
 use datafusion_expr::Expr;
-use datafusion_physical_expr::{Partitioning, PhysicalSortExpr};
+use datafusion_physical_expr::{EquivalenceProperties, Partitioning, PhysicalSortExpr};
 use futures::stream::BoxStream;
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 
@@ -28,14 +28,22 @@ pub struct FindFilesExec {
     predicate: Expr,
     state: DeltaTableState,
     log_store: LogStoreRef,
+    cache: PlanProperties,
 }
 
 impl FindFilesExec {
     pub fn new(state: DeltaTableState, log_store: LogStoreRef, predicate: Expr) -> Result<Self> {
+        let cache =
+            PlanProperties::new(
+                EquivalenceProperties::new(ONLY_FILES_SCHEMA.clone()),
+                Partitioning::RoundRobinBatch(num_cpus::get()),
+                ExecutionMode::Bounded
+            );
         Ok(Self {
             predicate,
             log_store,
             state,
+            cache,
         })
     }
 }
@@ -86,15 +94,7 @@ impl ExecutionPlan for FindFilesExec {
     }
 
     fn properties(&self) -> &PlanProperties {
-        todo!()
-    }
-
-    fn output_partitioning(&self) -> Partitioning {
-        Partitioning::RoundRobinBatch(num_cpus::get())
-    }
-
-    fn output_ordering(&self) -> Option<&[PhysicalSortExpr]> {
-        None
+        &self.cache
     }
 
     fn children(&self) -> Vec<Arc<dyn ExecutionPlan>> {
